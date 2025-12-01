@@ -690,4 +690,6 @@ class FinalWin(QWidget):
         """Cierra toda la aplicación."""
         from PyQt5.QtWidgets import QApplication
         QApplication.instance().quit()
-
+git status
+git add
+git commit
