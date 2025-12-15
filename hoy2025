@@ -304,4 +304,7 @@ class FinalWin(QWidget):
         self.setLayout(layout)
 
         self.show()
-
+       
+        git status
+        git commit
+        git add
