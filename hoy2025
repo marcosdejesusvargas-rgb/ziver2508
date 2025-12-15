@@ -1,0 +1,307 @@
+# instr.py
+
+win_width = 950
+win_height = 650
+win_x = 200
+win_y = 100
+
+txt_title = "Test de Hidratación"
+txt_hello = "¡Bienvenido al Test de Hidratación!"
+txt_instruction = "Responde el test y al final verás tu resultado."
+txt_next = "Comenzar"
+
+txt_finalwin = "Resultados"
+
+# my_app.py
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QPushButton
+
+from instr import *
+from second_win import TestWin
+
+
+class MainWin(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle(txt_title)
+        self.resize(win_width, win_height)
+        self.move(win_x, win_y)
+
+        self.setStyleSheet("""
+            QWidget { background-color: #e0f7fa; font-family: Arial; color: #123456; }
+            QLabel#Title { font-size: 22px; font-weight: bold; }
+            QLabel#Text { font-size: 14px; }
+            QPushButton { font-size: 15px; padding: 10px 18px; background:#00796b; color:white; border-radius:8px; }
+            QPushButton:hover { background:#009688; }
+        """)
+
+        self.hello_text = QLabel(txt_hello)
+        self.hello_text.setObjectName("Title")
+        self.hello_text.setAlignment(Qt.AlignCenter)
+
+        self.instruction = QLabel(txt_instruction)
+        self.instruction.setObjectName("Text")
+        self.instruction.setAlignment(Qt.AlignCenter)
+        self.instruction.setWordWrap(True)
+
+        self.btn_next = QPushButton(txt_next)
+        self.btn_next.clicked.connect(self.open_test)
+
+        layout = QVBoxLayout()
+        layout.addStretch(1)
+        layout.addWidget(self.hello_text)
+        layout.addSpacing(10)
+        layout.addWidget(self.instruction)
+        layout.addSpacing(30)
+        layout.addWidget(self.btn_next, alignment=Qt.AlignCenter)
+        layout.addStretch(1)
+        self.setLayout(layout)
+
+        self.show()
+
+    def open_test(self):
+        self.tw = TestWin(self)   # ✅ 1 -> 2
+        self.hide()
+
+    def go_to_start(self):
+        self.show()               # ✅ volver desde 2
+
+    def go_to_results(self, data):
+        from final_win import FinalWin
+        self.fw = FinalWin(data)  # ✅ 2 -> 3
+        self.hide()
+
+
+if __name__ == "__main__":
+    app = QApplication([])
+    mw = MainWin()
+    app.exec_()
+# second_win.py
+
+from PyQt5.QtWidgets import (
+    QWidget, QLabel, QVBoxLayout, QHBoxLayout, QGroupBox,
+    QRadioButton, QButtonGroup, QSpinBox, QComboBox,
+    QPushButton, QMessageBox
+)
+
+from PyQt5.QtCore import Qt
+
+
+class TestWin(QWidget):
+    def __init__(self, main_window):
+        super().__init__()
+        self.main_window = main_window
+        self.init_ui()
+        self.show()
+
+    def init_ui(self):
+        self.setMinimumSize(950, 650)
+
+        self.setStyleSheet("""
+            QWidget { background-color: #e0f7fa; font-family: Arial; color: #123456; }
+            QGroupBox {
+                font-weight: bold; border: 1px solid #80deea; border-radius: 6px;
+                margin-top: 10px; padding-top: 15px; background-color: white;
+             }
+        """)
+
+        main_layout = QVBoxLayout()
+
+        title = QLabel("Pantalla 2 – Test de hidratación")
+        title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet("font-size: 20px; font-weight: bold;")
+        main_layout.addWidget(title)
+
+        subtitle = QLabel("Responde las preguntas y luego revisa tu resultado final.")
+        subtitle.setAlignment(Qt.AlignCenter)
+        subtitle.setWordWrap(True)
+        main_layout.addWidget(subtitle)
+
+        knowledge_box = QGroupBox("1. Conocimientos básicos")
+        kb_layout = QVBoxLayout()
+
+        self.q1_group = QButtonGroup(self)
+        q1_label = QLabel("1) ¿Cuánta agua se recomienda al día para un adulto promedio?")
+        q1_label.setWordWrap(True)
+        q1_a = QRadioButton("a) 1 litro")
+        q1_b = QRadioButton("b) 2–3 litros")
+        q1_c = QRadioButton("c) Más de 5 litros")
+        q1_a.setProperty("option", "A"); q1_b.setProperty("option", "B"); q1_c.setProperty("option", "C")
+        kb_layout.addWidget(q1_label)
+        for b in (q1_a, q1_b, q1_c):
+            self.q1_group.addButton(b); kb_layout.addWidget(b)
+
+        self.q2_group = QButtonGroup(self)
+        q2_label = QLabel("2) Durante ejercicio prolongado, lo más recomendado es:")
+        q2_label.setWordWrap(True)
+        q2_a = QRadioButton("a) Beber cada 15–20 minutos")
+        q2_b = QRadioButton("b) Beber solo al final")
+        q2_c = QRadioButton("c) Beber 2 litros antes")
+        q2_a.setProperty("option", "A"); q2_b.setProperty("option", "B"); q2_c.setProperty("option", "C")
+        kb_layout.addWidget(q2_label)
+        for b in (q2_a, q2_b, q2_c):
+            self.q2_group.addButton(b); kb_layout.addWidget(b)
+
+        self.q3_group = QButtonGroup(self)
+        q3_label = QLabel("3) Un buen indicador de hidratación es:")
+        q3_a = QRadioButton("a) Color de la orina")
+        q3_b = QRadioButton("b) Cantidad de pasos")
+        q3_c = QRadioButton("c) Horas con el móvil")
+        q3_a.setProperty("option", "A"); q3_b.setProperty("option", "B"); q3_c.setProperty("option", "C")
+        kb_layout.addWidget(q3_label)
+        for b in (q3_a, q3_b, q3_c):
+            self.q3_group.addButton(b); kb_layout.addWidget(b)
+
+        self.q4_group = QButtonGroup(self)
+        q4_label = QLabel("4) Un adulto pierde al día aproximadamente:")
+        q4_a = QRadioButton("a) 0,5–1 L")
+        q4_b = QRadioButton("b) 2–2,5 L")
+        q4_c = QRadioButton("c) Más de 6 L")
+        q4_a.setProperty("option", "A"); q4_b.setProperty("option", "B"); q4_c.setProperty("option", "C")
+        kb_layout.addWidget(q4_label)
+        for b in (q4_a, q4_b, q4_c):
+            self.q4_group.addButton(b); kb_layout.addWidget(b)
+
+        knowledge_box.setLayout(kb_layout)
+        main_layout.addWidget(knowledge_box)
+
+        habits_box = QGroupBox("2. Tus hábitos")
+        hb_layout = QVBoxLayout()
+
+        h1 = QHBoxLayout()
+        h1.addWidget(QLabel("5) Vasos de agua al día:"))
+        self.spin_glasses = QSpinBox()
+        self.spin_glasses.setRange(0, 30)
+        h1.addWidget(self.spin_glasses)
+        hb_layout.addLayout(h1)
+
+        h2 = QHBoxLayout()
+        h2.addWidget(QLabel("6) Actividad física:"))
+        self.combo_activity = QComboBox()
+        self.combo_activity.addItems(["Poca o ninguna", "1–2 veces por semana", "3 o más veces por semana"])
+        h2.addWidget(self.combo_activity)
+        hb_layout.addLayout(h2)
+
+        h3 = QHBoxLayout()
+        h3.addWidget(QLabel("7) ¿Bebes agua antes de entrenar?"))
+        self.combo_pretraining = QComboBox()
+        self.combo_pretraining.addItems(["No hago deporte", "Casi nunca", "A veces", "Casi siempre"])
+        h3.addWidget(self.combo_pretraining)
+        hb_layout.addLayout(h3)
+
+        habits_box.setLayout(hb_layout)
+        main_layout.addWidget(habits_box)
+
+        buttons = QHBoxLayout()
+        btn_back = QPushButton("Volver")
+        btn_back.clicked.connect(self.go_back)
+        btn_next = QPushButton("Ver resultados")
+        btn_next.clicked.connect(self.calculate_and_go_next)
+        buttons.addWidget(btn_back)
+        buttons.addStretch()
+        buttons.addWidget(btn_next)
+        main_layout.addLayout(buttons)
+
+        self.setLayout(main_layout)
+
+    def go_back(self):
+        self.main_window.go_to_start()  # ✅ 2 -> 1
+        self.close()
+
+    def calculate_and_go_next(self):
+        groups = [self.q1_group, self.q2_group, self.q3_group, self.q4_group]
+        for i, g in enumerate(groups, start=1):
+            if g.checkedButton() is None:
+                QMessageBox.warning(self, "Falta respuesta", f"Responde la pregunta {i}")
+                return
+
+        correct = {1: "B", 2: "A", 3: "A", 4: "B"}
+        groups_map = {1: self.q1_group, 2: self.q2_group, 3: self.q3_group, 4: self.q4_group}
+
+        knowledge_score = sum(
+            1 for i, g in groups_map.items()
+            if g.checkedButton().property("option") == correct[i]
+        )
+
+        glasses = self.spin_glasses.value()
+        habit_score = min(6, max(0, glasses // 2))
+        hydration_score = int(((knowledge_score / 4) * 100 + (habit_score / 6) * 100) / 2)
+
+        data = {"knowledge_score": knowledge_score, "habit_score": habit_score, "hydration_score": hydration_score}
+
+        self.main_window.go_to_results(data)  # ✅ 2 -> 3
+        self.close()
+
+# final_win.py
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QApplication
+
+from instr import *
+
+
+class FinalWin(QWidget):
+    def __init__(self, data):
+        super().__init__()
+        self.data = data
+
+        self.setWindowTitle(txt_finalwin)
+        self.resize(win_width, win_height)
+        self.move(win_x, win_y)
+
+        self.setStyleSheet("""
+            QWidget { background-color: #e0f7fa; font-family: Arial; color: #123456; }
+            QLabel#Title { font-size: 22px; font-weight: bold; }
+            QLabel#Score { font-size: 18px; font-weight: bold; padding: 12px; background: white;
+                           border: 1px solid #80deea; border-radius: 10px; }
+            QPushButton { font-size: 15px; padding: 10px 18px; background:#00796b; color:white; border-radius:8px; }
+            QPushButton:hover { background:#009688; }
+        """)
+0
+        score = int(self.data.get("hydration_score", 0))
+        knowledge = int(self.data.get("knowledge_score", 0))
+        habits = int(self.data.get("habit_score", 0))
+
+        if score >= 85:
+            level = "Excelente"
+            msg = "💧 Estás hidratado como pez en el agua 😄"
+        elif score >= 65:
+            level = "Bien (mejorable)"
+            msg = "🙂 Vas bien, pero un vasito extra te hace campeón."
+        else:
+            level = "Bajo"
+            msg = "🌵 Modo cactus activado… agua urgente 😅"
+
+        title = QLabel("Pantalla 3 – Resultados")
+        title.setObjectName("Title")
+        title.setAlignment(Qt.AlignCenter)
+
+        score_label = QLabel(f"Calificación: {score}/100  •  Nivel: {level}")
+        score_label.setObjectName("Score")
+        score_label.setAlignment(Qt.AlignCenter)
+
+        details = QLabel(f"Conocimiento: {knowledge}/4  |  Hábitos: {habits}/6")
+        details.setAlignment(Qt.AlignCenter)
+
+        msg_label = QLabel(msg)
+        msg_label.setAlignment(Qt.AlignCenter)
+        msg_label.setWordWrap(True)
+
+        btn_finish = QPushButton("✅ Finalizar")
+        btn_finish.clicked.connect(lambda: QApplication.instance().quit())
+
+        layout = QVBoxLayout()
+        layout.addStretch(1)
+        layout.addWidget(title)
+        layout.addSpacing(15)
+        layout.addWidget(score_label)
+        layout.addSpacing(10)
+        layout.addWidget(details)
+        layout.addSpacing(10)
+        layout.addWidget(msg_label)
+        layout.addSpacing(25)
+        layout.addWidget(btn_finish, alignment=Qt.AlignCenter)
+        layout.addStretch(1)
+        self.setLayout(layout)
+
+        self.show()
+
